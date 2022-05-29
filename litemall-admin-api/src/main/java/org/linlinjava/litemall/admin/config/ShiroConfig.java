@@ -6,13 +6,20 @@ import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.linlinjava.litemall.admin.shiro.AdminAuthorizingRealm;
 import org.linlinjava.litemall.admin.shiro.AdminWebSessionManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.env.Environment;
+import xyz.lzf.ext.cache.RedisCacheManager;
+import xyz.lzf.ext.shiro.RedisSessionDao;
 
+import javax.annotation.Resource;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -45,19 +52,22 @@ public class ShiroConfig {
     }
 
     @Bean
-    public SessionManager sessionManager() {
-
-        return new AdminWebSessionManager();
+    public SessionManager sessionManager(RedisSessionDao sessionDao) {//
+        DefaultWebSessionManager sessionManager = new AdminWebSessionManager();
+//        DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+        sessionManager.setSessionDAO(sessionDao);
+        return sessionManager;
     }
 
     @Bean
-    public DefaultWebSecurityManager defaultWebSecurityManager() {
+    public DefaultWebSecurityManager defaultWebSecurityManager( RedisCacheManager cacheManager,SessionManager sessionManager) {//
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(realm());
-        securityManager.setSessionManager(sessionManager());
+        securityManager.setSessionManager(sessionManager);
+        securityManager.setCacheManager(cacheManager);
         return securityManager;
     }
-
+    //使用注解权限
     @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
         AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor =
@@ -73,4 +83,5 @@ public class ShiroConfig {
         creator.setProxyTargetClass(true);
         return creator;
     }
+
 }

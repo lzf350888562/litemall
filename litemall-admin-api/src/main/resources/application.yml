@@ -3,17 +3,31 @@ spring:
     active: db, core, admin
   messages:
     encoding: UTF-8
+  redis:
+    host: 
+    password: 
 
 server:
-  port: 8083
+  port: 8080
+
+shiro:
+  redis:
+    session-expired: 10
+    session-key-prefix: "shiro_redis_session:"
+    cache-key-prefix: "shiro_redis_cache:"
+
 
 logging:
   level:
-    root:  ERROR
+    root:  info
     org.springframework:  ERROR
-    org.mybatis:  ERROR
-    org.linlinjava.litemall.admin:  DEBUG
-    org.linlinjava.litemall:  ERROR
+    org.linlinjava.litemall.db.dao: debug
+#    org.linlinjava.litemall.admin:  DEBUG
+#    org.linlinjava.litemall:  INFO
 
 swagger:
   production: false
+
+showdb:
+  enable: true
+  endpoint: '*'

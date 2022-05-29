@@ -68,6 +68,7 @@ public class AdminAuthController {
         // 生成验证码
         String text = kaptchaProducer.createText();
         BufferedImage image = kaptchaProducer.createImage(text);
+        // 这里获取的是Shiro封装的ShiroHttpSession, 重写了setAttribute, getAttribute等方法 操作Shiro自己的Session
         HttpSession session = request.getSession();
         session.setAttribute("kaptcha", text);
 
@@ -88,20 +89,20 @@ public class AdminAuthController {
     public Object login(@RequestBody String body, HttpServletRequest request) {
         String username = JacksonUtil.parseString(body, "username");
         String password = JacksonUtil.parseString(body, "password");
-//        String code = JacksonUtil.parseString(body, "code");
+        String code = JacksonUtil.parseString(body, "code");
 
         if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
             return ResponseUtil.badArgument();
         }
-//        if (StringUtils.isEmpty(code)) {
-//            return ResponseUtil.fail(ADMIN_INVALID_KAPTCHA_REQUIRED, "验证码不能空");
-//        }
+        if (StringUtils.isEmpty(code)) {
+            return ResponseUtil.fail(ADMIN_INVALID_KAPTCHA_REQUIRED, "验证码不能空");
+        }
 
-//        HttpSession session = request.getSession();
-//        String kaptcha = (String)session.getAttribute("kaptcha");
-//        if (Objects.requireNonNull(code).compareToIgnoreCase(kaptcha) != 0) {
-//            return ResponseUtil.fail(ADMIN_INVALID_KAPTCHA, "验证码不正确", doKaptcha(request));
-//        }
+        HttpSession session = request.getSession();
+        String kaptcha = (String)session.getAttribute("kaptcha");
+        if (Objects.requireNonNull(code).compareToIgnoreCase(kaptcha) != 0) {
+            return ResponseUtil.fail(ADMIN_INVALID_KAPTCHA, "验证码不正确", doKaptcha(request));
+        }
 
         Subject currentUser = SecurityUtils.getSubject();
         try {
@@ -132,6 +133,7 @@ public class AdminAuthController {
         adminInfo.put("avatar", admin.getAvatar());
 
         Map<Object, Object> result = new HashMap<Object, Object>();
+        // todo
         result.put("token", currentUser.getSession().getId());
         result.put("adminInfo", adminInfo);
         return ResponseUtil.ok(result);

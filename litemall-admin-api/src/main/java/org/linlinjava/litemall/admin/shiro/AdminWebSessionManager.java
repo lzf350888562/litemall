@@ -9,6 +9,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.Serializable;
 
+/**
+ * 修改获取sessionId的方式, sessionId由SessionIdGenerator产生, 可通过重写AbstractSessionDAO的方法实现
+ */
 public class AdminWebSessionManager extends DefaultWebSessionManager {
 
     public static final String LOGIN_TOKEN_KEY = "X-Litemall-Admin-Token";
